@@ -39,10 +39,11 @@ import { CustomField } from "./CustomField";
 import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils";
 import { set } from "mongoose";
 import { updateCredits } from "@/lib/actions/user.action";
+import MediaUploader from "./MediaUploader";
 
 function TransformationForm({ action, data = null, userId, type, creditBalance, config = null }: TransformationFormProps) {
     const transformationType = transformationTypes[type]
-    const [Image, setImage] = useState(data)
+    const [image, setImage] = useState(data)
     const [newTransformation, setNewTransformation] = useState<Transformations | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isTransforming, setIsTransforming] = useState(false)
@@ -193,6 +194,23 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
 
                     </div>
                 )}
+
+                <div className="media-uploader-field">
+                    <CustomField
+                        control={form.control}
+                        name="publicId"
+                        className="flex size-full flex-col"
+                        render={({ field }) => (
+                            <MediaUploader
+                                onValueChange={field.onChange}
+                                setImage={setImage} 
+                                publicId={field.value}
+                                image={image}
+                                type={type}
+                            />
+                        )}
+                    />
+                </div>
 
                 <div className="flex flex-col gap-4">
                     <Button
