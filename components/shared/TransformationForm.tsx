@@ -37,11 +37,11 @@ import React, { useEffect, useState, useTransition } from 'react'
 import { aspectRatioOptions, creditFee, defaultValues, transformationTypes } from "@/constants";
 import { CustomField } from "./CustomField";
 import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils";
-import { updateCredits } from "@/lib/actions/user.action";
+import { updateCredits } from "@/lib/actions/user.actions";
 import MediaUploader from "./MediaUploader";
 import TransformImage from "./TransformImage";
 import { getCldImageUrl } from "next-cloudinary";
-import { addImage, updateImage } from "@/lib/actions/image.action";
+import { addImage, updateImage } from "@/lib/actions/image.actions";
 import { useRouter } from "next/navigation";
 import { set } from "mongoose";
 import { InsufficientCreditsModal } from "./InsufficentCreditsModel";
@@ -188,9 +188,9 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {creditBalance < Math.abs(creditFee) && (
+                {creditBalance < Math.abs(creditFee) &&
                     <InsufficientCreditsModal />
-                )}
+                }
                 <CustomField
                     control={form.control}
                     name="title"
@@ -321,7 +321,5 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
 
     )
 }
-
-
 
 export default TransformationForm
