@@ -31,7 +31,7 @@ const MediaUploader = ({
             publicId: result?.info?.public_id,
             width: result?.info?.width,
             height: result?.info?.height,
-            secureUrl: result?.info?.secure_url
+            secureURL: result?.info?.secure_url
         }))
 
         onValueChange(result?.info?.public_id)
@@ -64,7 +64,7 @@ const MediaUploader = ({
         >
             {({ open }) => (
                 <div className="flex flex-col gap-4">
-                    <h3 className="h3-bold text-dark-500">
+                    <h3 className="h3-bold text-dark-600">
                         Original
                     </h3>
 

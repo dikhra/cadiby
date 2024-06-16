@@ -5,11 +5,11 @@ export interface IImage extends Document {
     title: string;
     transformationTypes: string;
     publicId: string;
-    secureUrl: string;
+    secureURL: string;
     widht?: number;
     hight?: number;
     config?: object;
-    transformationUrl?: string;
+    transformationURL?: string;
     aspectRatio?: string;
     color?: string;
     prompt?: string;
@@ -25,11 +25,11 @@ const ImageSchema = new Schema({
     title: {type: String, required: true},
     transformationTypes: {type: String, required: true},
     publicId: {type: String, required: true},
-    secureUrl: {type: url, required: true},
+    secureURL: {type: String, required: true},
     widht: {type: Number},
     hight: {type: Number},
     config: {type: Object},
-    transformationUrl: {type: url},
+    transformationURL: {type: String},
     aspectRatio: {type: String},
     color: {type: String},
     prompt: {type: String},
