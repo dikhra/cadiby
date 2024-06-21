@@ -72,69 +72,69 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
-    
-        if(data || image) {
-          const transformationUrl = getCldImageUrl({
-            width: image?.width,
-            height: image?.height,
-            src: image?.publicId,
-            ...transformationConfig
-          })
-    
-          const imageData = {
-            title: values.title,
-            publicId: image?.publicId,
-            transformationType: type,
-            width: image?.width,
-            height: image?.height,
-            config: transformationConfig,
-            secureURL: image?.secureURL,
-            transformationURL: transformationUrl,
-            aspectRatio: values.aspectRatio,
-            prompt: values.prompt,
-            color: values.color,
-          }
-    
-          if(action === 'Add') {
-            try {
-              const newImage = await addImage({
-                image: imageData,
-                userId,
-                path: '/'
-              })
-    
-              if(newImage) {
-                form.reset()
-                setImage(data)
-                router.push(`/transformations/${newImage._id}`)
-              }
-            } catch (error) {
-              console.log(error);
+
+        if (data || image) {
+            const transformationUrl = getCldImageUrl({
+                width: image?.width,
+                height: image?.height,
+                src: image?.publicId,
+                ...transformationConfig
+            })
+
+            const imageData = {
+                title: values.title,
+                publicId: image?.publicId,
+                transformationType: type,
+                width: image?.width,
+                height: image?.height,
+                config: transformationConfig,
+                secureURL: image?.secureURL,
+                transformationURL: transformationUrl,
+                aspectRatio: values.aspectRatio,
+                prompt: values.prompt,
+                color: values.color,
             }
-          }
-    
-          if(action === 'Update') {
-            try {
-              const updatedImage = await updateImage({
-                image: {
-                  ...imageData,
-                  _id: data._id
-                },
-                userId,
-                path: `/transformations/${data._id}`
-              })
-    
-              if(updatedImage) {
-                router.push(`/transformations/${updatedImage._id}`)
-              }
-            } catch (error) {
-              console.log(error);
+
+            if (action === 'Add') {
+                try {
+                    const newImage = await addImage({
+                        image: imageData,
+                        userId,
+                        path: '/'
+                    })
+
+                    if (newImage) {
+                        form.reset()
+                        setImage(data)
+                        router.push(`/transformations/${newImage._id}`)
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
             }
-          }
+
+            if (action === 'Update') {
+                try {
+                    const updatedImage = await updateImage({
+                        image: {
+                            ...imageData,
+                            _id: data._id
+                        },
+                        userId,
+                        path: `/transformations/${data._id}`
+                    })
+
+                    if (updatedImage) {
+                        router.push(`/transformations/${updatedImage._id}`)
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
         }
-    
+
         setIsSubmitting(false)
-      }
+    }
 
     const onSelectFieldHandler = (value: string, onChangeField: (value: string) => void) => {
         const imageSize = aspectRatioOptions[value as AspectRatioKey]
@@ -161,8 +161,9 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                 }
             }))
 
-            return onChangeField(value)
-        }, 1000);
+        }, 1000)();
+
+        return onChangeField(value)
     }
 
     const onTransformHandler = async () => {
@@ -208,6 +209,7 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                         render={({ field }) => (
                             <Select
                                 onValueChange={(value) => onSelectFieldHandler(value, field.onChange)}
+                                value={field.value}
                             >
                                 <SelectTrigger className="select-field">
                                     <SelectValue placeholder="Select size" />
@@ -232,7 +234,7 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                             name="prompt"
                             formLabel={type === 'remove' ? 'Object to remove' : 'Object to recolor'}
                             className="w-full"
-                            render={({ field }) =>
+                            render={({ field }) => (
                                 <Input {...field}
                                     value={field.value}
                                     className="input-field"
@@ -243,7 +245,7 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                                         field.onChange
                                     )}
                                 />
-                            }
+                            )}
                         />
 
                         {type === 'recolor' && (
