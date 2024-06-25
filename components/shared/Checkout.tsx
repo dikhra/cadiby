@@ -1,45 +1,59 @@
-'use client'
+'use client';
 
-import { useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { handleError } from '@/lib/utils';
+import { useEffect } from 'react';
 
-const Checkout = ({ planId, amount, buyerId }: any) => {
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+const Checkout = ({ name, planId, amount, credits, buyerId }: any) => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY as string);
+    script.async = true;
+
+    script.onload = () => {
+      console.log('Snap.js loaded.');
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleCheckout = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Hindari submit form secara default
+    event.preventDefault();
 
-    setLoading(true);
     try {
-      const response = await axios.post('/api/midtrans', {
-        planId,
-        buyerId,
+      const data = {
+        name: name,
+        planId: planId,
+        amount: amount,
+        credits: credits,
+        buyerId: buyerId,
+      };
+
+      const response = await fetch('api/midtrans', {
+        method: 'POST',
+        body: JSON.stringify(data),
       });
 
-      const { token } = response.data.data;
+      if (!response.ok) {
+        throw new Error('Failed to fetch token from Midtrans API');
+      }
 
-      // Redirect to Midtrans payment page
-      (window as any).snap.pay(token, {
-        onSuccess: () => {
-          router.push('/success');
-        },
-        onPending: () => {
-          router.push('/pending');
-        },
-        onError: () => {
-          router.push('/error');
-        },
-        onClose: () => {
-          setLoading(false);
-        },
-      });
+      const requestData = await response.json();
+
+      console.log('Token from Midtrans:', requestData.token);
+
+      if ((window as any).snap && (window as any).snap.pay) {
+        (window as any).snap.pay(requestData.token);
+      } else {
+        throw new Error('Snap is not initialized properly');
+      }
     } catch (error) {
-      handleError(error);
-      setLoading(false);
+      handleError(error); // Handle error appropriately
     }
   };
 
