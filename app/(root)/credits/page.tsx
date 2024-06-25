@@ -1,6 +1,5 @@
 import { SignedIn, auth } from "@clerk/nextjs";
 import Image from "next/image";
-import Head from "next/head"; // Import next/head untuk menyisipkan script di <head>
 import { redirect } from "next/navigation";
 
 import Header from "@/components/shared/Header";
@@ -18,14 +17,6 @@ const Credits = async () => {
 
   return (
     <>
-      <Head>
-        <script
-          type="text/javascript"
-          src="https://app.sandbox.midtrans.com/snap/snap.js"
-          data-client-key="<CLIENT-KEY>"
-        ></script>
-      </Head>
-
       <Header
         title="Buy Credits"
         subtitle="Choose a credit package that suits your needs!"
@@ -52,9 +43,8 @@ const Credits = async () => {
                     className="flex items-center gap-4"
                   >
                     <Image
-                      src={`/assets/icons/${
-                        inclusion.isIncluded ? "check.svg" : "cross.svg"
-                      }`}
+                      src={`/assets/icons/${inclusion.isIncluded ? "check.svg" : "cross.svg"
+                        }`}
                       alt="check"
                       width={24}
                       height={24}
