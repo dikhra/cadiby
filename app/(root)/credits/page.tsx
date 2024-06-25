@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { plans } from "@/constants";
 import { getUserById } from "@/lib/actions/user.actions";
 import Checkout from "@/components/shared/Checkout";
+import Head from "next/head";
+// import { useEffect } from "react";
 
 const Credits = async () => {
   const { userId } = auth();
@@ -15,8 +17,31 @@ const Credits = async () => {
 
   const user = await getUserById(userId);
 
+  // useEffect(() => {
+  //   const snapScript = "https://app.stg.midtrans.com/snap/snap.js"
+  //   const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY as string;
+
+  //   const script = document.createElement("script");
+  //   script.src = snapScript;
+  //   script.setAttribute("data-client-key", clientKey);
+  //   script.async = true;
+
+  //   document.body.appendChild(script);
+
+  //   return () => {
+  //     document.body.removeChild(script);
+  //   };  
+
+  // }, []);
+
   return (
     <>
+      <Head>
+        <script type="text/javascript"
+          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} async></script>
+      </Head>
+      
       <Header
         title="Buy Credits"
         subtitle="Choose a credit package that suits your needs!"
@@ -61,6 +86,7 @@ const Credits = async () => {
               ) : (
                 <SignedIn>
                   <Checkout
+                    name={plan.name}
                     planId={plan._id}
                     amount={plan.price}
                     credits={plan.credits}

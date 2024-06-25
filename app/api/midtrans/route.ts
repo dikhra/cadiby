@@ -1,68 +1,34 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Transaction from "@/lib/database/models/transaction.model";
-import { plans } from "@/constants";
 import { connectToDatabase } from "@/lib/database/mongoose";
-import snap from "@/lib/midtrans";
 import { handleError } from "@/lib/utils";
+import { NextResponse } from "next/server";
+const midtransClient = require('midtrans-client');
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  await connectToDatabase();
+const snap = new midtransClient.Snap({
+  isProduction: false, // Ubah menjadi true saat di production
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY,
+});
 
-  if (req.method === "POST") {
-    const { planId, buyerId } = req.body;
+export async function POST(request: Request) {
+  const { name, planId, amount, credits, buyerId } = await request.json();
 
-    const selectedPlan = plans.find((plan) => plan._id === planId);
-
-    if (!selectedPlan) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid plan ID",
-      });
-    }
-
-    const orderId = `order-${Date.now()}`;
-
-    const newTransaction = new Transaction({
-      orderId,
-      amount: selectedPlan.price,
-      plan: selectedPlan.name,
-      credits: selectedPlan.credits,
-      buyer: buyerId,
-    });
-
-    try {
-      await newTransaction.save();
-
-      const transactionParameters = {
-        transaction_details: {
-          order_id: orderId,
-          gross_amount: selectedPlan.price,
-        },
-        item_details: [
-          {
-            id: planId,
-            price: selectedPlan.price,
-            quantity: 1,
-            name: selectedPlan.name,
-          },
-        ],
-        customer_details: {
-          user_id: buyerId,
-        },
-      };
-
-      const transaction = await snap.createTransaction(transactionParameters);
-
-      res.status(200).json({
-        status: "success",
-        message: "Transaction created",
-        data: transaction,
-      });
-    } catch (error) {
-      handleError(error);
-    }
+  let parameter = {
+    item_details: {
+      id: planId,
+      price: amount,
+      name: name,
+      quantity: 1,
+      credits: credits,
+    },
+    transaction_details: {
+      gross_amount: amount,
+      order_id: planId,
+      buyerId: buyerId,
+    },
   }
+
+  const token = await snap.createTransactionToken(parameter);
+  return NextResponse.json({ token });
 }
