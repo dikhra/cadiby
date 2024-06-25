@@ -76,7 +76,7 @@ function TransformImage({ image, type, title, transformationConfig, isTransformi
                 </div>
             ) : (
                 <div className='transformed-placeholder'>
-                    TransformedImage
+                    Transformed Image
                 </div>
             )}
         </div>

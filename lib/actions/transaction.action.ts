@@ -6,23 +6,6 @@ import { connectToDatabase } from '../database/mongoose';
 import Transaction from '../database/models/transaction.model';
 import { updateCredits } from './user.actions';
 
-export async function checkoutCredits(transaction: CheckoutTransactionParams) {
-    const data = {
-        name: transaction.plan,
-        price: transaction.amount,
-        credits: transaction.credits
-    }
-
-    const response = await fetch('api/midtrans', {
-        method: "POST",
-        body: JSON.stringify(data)
-    })
-
-    const requestData = await response.json()
-    console.log({requestData});
-    
-}
-
 export async function createTransaction(transaction: CreateTransactionParams) {
     try {
       await connectToDatabase();

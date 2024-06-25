@@ -3,7 +3,8 @@ import Transaction from "@/lib/database/models/transaction.model";
 import { connectToDatabase } from "@/lib/database/mongoose";
 import { handleError } from "@/lib/utils";
 import { NextResponse } from "next/server";
-const midtransClient = require('midtrans-client');
+import { createTransaction } from "@/lib/actions/transaction.action";
+const midtransClient = require("midtrans-client");
 
 const snap = new midtransClient.Snap({
   isProduction: false, // Ubah menjadi true saat di production
@@ -13,6 +14,8 @@ const snap = new midtransClient.Snap({
 
 export async function POST(request: Request) {
   const { name, planId, amount, credits, buyerId } = await request.json();
+
+  const orderId = `${planId}-${Date.now()}`;
 
   let parameter = {
     item_details: {
@@ -24,11 +27,29 @@ export async function POST(request: Request) {
     },
     transaction_details: {
       gross_amount: amount,
-      order_id: planId,
+      order_id: orderId,
       buyerId: buyerId,
     },
-  }
+  };
 
-  const token = await snap.createTransactionToken(parameter);
-  return NextResponse.json({ token });
+  try {
+    const token = await snap.createTransactionToken(parameter);
+
+    const transaction = {
+      orderId: orderId,
+      amount: amount || 0,
+      plan: name || "",
+      credits: credits || "",
+      buyerId: buyerId || "",
+      createdAt: new Date(),
+    };
+
+    if (token) {
+      await createTransaction(transaction);
+    }
+
+    return NextResponse.json({ token });
+  } catch (error) {
+    handleError(error); // Handle error appropriately
+  }
 }
