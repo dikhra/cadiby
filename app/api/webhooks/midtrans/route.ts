@@ -10,6 +10,8 @@ export async function POST(request: Request) {
   const transactionStatus = response.transaction_status;
   const fraudStatus = response.fraud_status;
 
+  const buyerId = await Transaction.findOne({ orderId }).select("buyer");
+
   if (
     transactionStatus === "accept" ||
     (transactionStatus === "settlement" && fraudStatus === "accept")
@@ -22,6 +24,7 @@ export async function POST(request: Request) {
       const updatedTransaction = await updateTransactionStatus(
         orderId,
         transaction.status
+
       );
 
       return NextResponse.json({

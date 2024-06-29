@@ -27,7 +27,14 @@ export async function updateTransactionStatus(orderId: string, status: string) {
     await connectToDatabase();
 
     // Update the transaction status
-    await Transaction.updateOne({ orderId }, { status: status, updatedAt: new Date() });
+    await Transaction.updateOne(
+      { orderId },
+      { status: status, updatedAt: new Date() }
+    );
+
+    const transaction = await Transaction.findOne({ orderId: orderId });
+
+    await updateCredits(transaction.buyer, transaction.credits);
   } catch (error) {
     handleError(error);
   }
