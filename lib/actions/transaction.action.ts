@@ -30,7 +30,7 @@ export async function updateTransactionStatus(orderId: string, status: string) {
     await Transaction.findOneAndUpdate(
       { orderId: orderId },
       { status: status },
-      { updatedAt: new Date() }
+      { updatedAt: Date.now() }
     );
 
     const transaction = await Transaction.findOne({ orderId: orderId });
