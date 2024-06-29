@@ -44,9 +44,9 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     };
 
-    if (token) {
-      await createTransaction(transaction);
-    }
+    // if (token) {
+    //   await createTransaction(transaction);
+    // }
 
     return NextResponse.json({ token });
   } catch (error) {
