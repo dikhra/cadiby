@@ -27,9 +27,10 @@ export async function updateTransactionStatus(orderId: string, status: string) {
     await connectToDatabase();
 
     // Update the transaction status
-    await Transaction.updateOne(
-      { orderId },
-      { status: status, updatedAt: new Date() }
+    await Transaction.findOneAndUpdate(
+      { orderId: orderId },
+      { status: status },
+      { updatedAt: new Date() }
     );
 
     const transaction = await Transaction.findOne({ orderId: orderId });
