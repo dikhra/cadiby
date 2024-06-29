@@ -35,18 +35,16 @@ export async function POST(request: Request) {
   try {
     const token = await snap.createTransactionToken(parameter);
 
-    const transaction = {
+    const transaction = await createTransaction({
+      createdAt: new Date(),
       orderId: orderId,
       amount: amount || 0,
       plan: name || "",
       credits: credits || "",
       buyerId: buyerId || "",
-      createdAt: new Date(),
-    };
-
-    // if (token) {
-    //   await createTransaction(transaction);
-    // }
+      status: "pending",
+      updatedAt: new Date(),
+    });
 
     return NextResponse.json({ token });
   } catch (error) {

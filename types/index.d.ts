@@ -80,12 +80,14 @@ declare type CheckoutTransactionParams = {
 };
 
 declare type CreateTransactionParams = {
+  createdAt: Date;
   orderId: string;
   amount: number;
   credits: number;
   plan: string;
   buyerId: string;
-  createdAt: Date;
+  status: string;
+  updatedAt: Date;
 };
 
 declare type TransformationTypeKey =

@@ -24,6 +24,14 @@ const TransactionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+  status: {
+    type: String,
+    default: "pending",
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Transaction = models?.Transaction || model("Transaction", TransactionSchema);
