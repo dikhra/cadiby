@@ -1,22 +1,21 @@
 // lib/actions/transaction.actions.ts
 
-import { redirect } from "next/navigation";
 import { handleError } from "../utils";
-import { connectToDatabase } from "../database/mongoose";
-import Transaction from "../database/models/transaction.model";
+import { prisma } from "../database/prisma";
 import { updateCredits } from "./user.actions";
 
 export async function createTransaction(transaction: CreateTransactionParams) {
   try {
-    await connectToDatabase();
+    const { buyerId, ...rest } = transaction;
 
-    // Create a new transaction with a buyerId
-    const newTransaction = await Transaction.create({
-      ...transaction,
-      buyer: transaction.buyerId,
+    const newTransaction = await prisma.transaction.create({
+      data: {
+        ...rest,
+        buyer: { connect: { id: buyerId } },
+      },
     });
 
-    return JSON.parse(JSON.stringify(newTransaction));
+    return newTransaction;
   } catch (error) {
     handleError(error);
   }
@@ -24,18 +23,12 @@ export async function createTransaction(transaction: CreateTransactionParams) {
 
 export async function updateTransactionStatus(orderId: string, status: string) {
   try {
-    await connectToDatabase();
+    const transaction = await prisma.transaction.update({
+      where: { orderId },
+      data: { status },
+    });
 
-    // Update the transaction status
-    await Transaction.findOneAndUpdate(
-      { orderId: orderId },
-      { status: status },
-      { updatedAt: Date.now() }
-    );
-
-    const transaction = await Transaction.findOne({ orderId: orderId });
-
-    await updateCredits(transaction.buyer, transaction.credits);
+    await updateCredits(transaction.buyerId, transaction.credits ?? 0);
   } catch (error) {
     handleError(error);
   }

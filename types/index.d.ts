@@ -1,5 +1,14 @@
 /* eslint-disable no-unused-vars */
 
+declare type IImage = import("@prisma/client").Image & {
+  author: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    clerkId: string;
+  };
+};
+
 // ====== USER PARAMS
 declare type CreateUserParams = {
   clerkId: string;
@@ -38,7 +47,7 @@ declare type AddImageParams = {
 
 declare type UpdateImageParams = {
   image: {
-    _id: string;
+    id: string;
     title: string;
     publicId: string;
     transformationType: string;

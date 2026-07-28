@@ -1,5 +1,4 @@
 import { updateTransactionStatus } from "@/lib/actions/transaction.action";
-import Transaction from "@/lib/database/models/transaction.model";
 import { handleError } from "@/lib/utils";
 import { NextResponse } from "next/server";
 

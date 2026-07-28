@@ -57,9 +57,9 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
 
     const initialValues = data && action === 'Update' ? {
         title: data?.title,
-        aspectRatio: data?.aspectRatio,
-        color: data?.color,
-        prompt: data?.prompt,
+        aspectRatio: data?.aspectRatio ?? undefined,
+        color: data?.color ?? undefined,
+        prompt: data?.prompt ?? undefined,
         publicId: data?.publicId,
     } : defaultValues
 
@@ -75,20 +75,20 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
 
         if (data || image) {
             const transformationUrl = getCldImageUrl({
-                width: image?.width,
-                height: image?.height,
-                src: image?.publicId,
+                width: image?.width ?? undefined,
+                height: image?.height ?? undefined,
+                src: image?.publicId ?? "",
                 ...transformationConfig
             })
 
             const imageData = {
                 title: values.title,
-                publicId: image?.publicId,
+                publicId: image?.publicId ?? "",
                 transformationType: type,
-                width: image?.width,
-                height: image?.height,
+                width: image?.width ?? 0,
+                height: image?.height ?? 0,
                 config: transformationConfig,
-                secureURL: image?.secureURL,
+                secureURL: image?.secureURL ?? "",
                 transformationURL: transformationUrl,
                 aspectRatio: values.aspectRatio,
                 prompt: values.prompt,
@@ -106,7 +106,7 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                     if (newImage) {
                         form.reset()
                         setImage(data)
-                        router.push(`/transformations/${newImage._id}`)
+                        router.push(`/transformations/${newImage.id}`)
                     }
                 } catch (error) {
                     console.log(error);
@@ -118,14 +118,14 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                     const updatedImage = await updateImage({
                         image: {
                             ...imageData,
-                            _id: data._id
+                            id: data!.id
                         },
                         userId,
-                        path: `/transformations/${data._id}`
+                        path: `/transformations/${data!.id}`
                     })
 
                     if (updatedImage) {
-                        router.push(`/transformations/${updatedImage._id}`)
+                        router.push(`/transformations/${updatedImage.id}`)
                     }
                 } catch (error) {
                     console.log(error);

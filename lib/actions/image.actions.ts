@@ -1,152 +1,148 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { connectToDatabase } from "../database/mongoose";
-import { handleError } from "../utils";
-import User from "../database/models/user.model";
-import Image from "../database/models/image.model";
 import { redirect } from "next/navigation";
+import { v2 as cloudinary } from "cloudinary";
 
-import { v2 as cloudinary } from 'cloudinary'
+import { prisma } from "../database/prisma";
+import { handleError } from "../utils";
 
-const populateUser = (query: any) => query.populate({
-  path: 'author',
-  model: User,
-  select: '_id firstName lastName clerkId'
-})
+const authorSelect = {
+  select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    clerkId: true,
+  },
+};
 
 // ADD IMAGE
 export async function addImage({ image, userId, path }: AddImageParams) {
   try {
-    await connectToDatabase();
-
-    const author = await User.findById(userId);
+    const author = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!author) {
       throw new Error("User not found");
     }
 
-    const newImage = await Image.create({
-      ...image,
-      author: author._id,
-    })
+    const newImage = await prisma.image.create({
+      data: {
+        ...image,
+        author: { connect: { id: author.id } },
+      },
+    });
 
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(newImage));
+    return newImage;
   } catch (error) {
-    handleError(error)
+    handleError(error);
   }
 }
 
 // UPDATE IMAGE
 export async function updateImage({ image, userId, path }: UpdateImageParams) {
   try {
-    await connectToDatabase();
+    const imageToUpdate = await prisma.image.findUnique({
+      where: { id: image.id },
+    });
 
-    const imageToUpdate = await Image.findById(image._id);
-
-    if (!imageToUpdate || imageToUpdate.author.toHexString() !== userId) {
+    if (!imageToUpdate || imageToUpdate.authorId !== userId) {
       throw new Error("Unauthorized or image not found");
     }
 
-    const updatedImage = await Image.findByIdAndUpdate(
-      imageToUpdate._id,
-      image,
-      { new: true }
-    )
+    const { id, ...data } = image;
+
+    const updatedImage = await prisma.image.update({
+      where: { id },
+      data,
+    });
 
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(updatedImage));
+    return updatedImage;
   } catch (error) {
-    handleError(error)
+    handleError(error);
   }
 }
 
 // DELETE IMAGE
 export async function deleteImage(imageId: string) {
   try {
-    await connectToDatabase();
-
-    await Image.findByIdAndDelete(imageId);
+    await prisma.image.delete({ where: { id: imageId } });
   } catch (error) {
-    handleError(error)
-  } finally{
-    redirect('/')
+    handleError(error);
+  } finally {
+    redirect("/");
   }
 }
 
 // GET IMAGE
 export async function getImageById(imageId: string) {
   try {
-    await connectToDatabase();
+    const image = await prisma.image.findUnique({
+      where: { id: imageId },
+      include: { author: authorSelect },
+    });
 
-    const image = await populateUser(Image.findById(imageId));
+    if (!image) throw new Error("Image not found");
 
-    if(!image) throw new Error("Image not found");
-
-    return JSON.parse(JSON.stringify(image));
+    return image;
   } catch (error) {
-    handleError(error)
+    handleError(error);
   }
 }
 
 // GET IMAGES
-export async function getAllImages({ limit = 9, page = 1, searchQuery = '' }: {
+export async function getAllImages({
+  limit = 9,
+  page = 1,
+  searchQuery = "",
+}: {
   limit?: number;
   page: number;
   searchQuery?: string;
 }) {
   try {
-    await connectToDatabase();
-
     cloudinary.config({
       cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
       secure: true,
-    })
+    });
 
-    let expression = 'folder=cadiby';
+    let expression = "folder=cadiby";
 
     if (searchQuery) {
-      expression += ` AND ${searchQuery}`
+      expression += ` AND ${searchQuery}`;
     }
 
-    const { resources } = await cloudinary.search
-      .expression(expression)
-      .execute();
+    const { resources } = await cloudinary.search.expression(expression).execute();
 
     const resourceIds = resources.map((resource: any) => resource.public_id);
 
-    let query = {};
+    const where = searchQuery ? { publicId: { in: resourceIds as string[] } } : {};
 
-    if(searchQuery) {
-      query = {
-        publicId: {
-          $in: resourceIds
-        }
-      }
-    }
+    const skipAmount = (Number(page) - 1) * limit;
 
-    const skipAmount = (Number(page) -1) * limit;
+    const images = await prisma.image.findMany({
+      where,
+      include: { author: authorSelect },
+      orderBy: { updatedAt: "desc" },
+      skip: skipAmount,
+      take: limit,
+    });
 
-    const images = await populateUser(Image.find(query))
-      .sort({ updatedAt: -1 })
-      .skip(skipAmount)
-      .limit(limit);
-    
-    const totalImages = await Image.find(query).countDocuments();
-    const savedImages = await Image.find().countDocuments();
+    const totalImages = await prisma.image.count({ where });
+    const savedImages = await prisma.image.count();
 
     return {
-      data: JSON.parse(JSON.stringify(images)),
+      data: images,
       totalPage: Math.ceil(totalImages / limit),
       savedImages,
-    }
+    };
   } catch (error) {
-    handleError(error)
+    handleError(error);
   }
 }
 
@@ -161,19 +157,20 @@ export async function getUserImages({
   userId: string;
 }) {
   try {
-    await connectToDatabase();
-
     const skipAmount = (Number(page) - 1) * limit;
 
-    const images = await populateUser(Image.find({ author: userId }))
-      .sort({ updatedAt: -1 })
-      .skip(skipAmount)
-      .limit(limit);
+    const images = await prisma.image.findMany({
+      where: { authorId: userId },
+      include: { author: authorSelect },
+      orderBy: { updatedAt: "desc" },
+      skip: skipAmount,
+      take: limit,
+    });
 
-    const totalImages = await Image.find({ author: userId }).countDocuments();
+    const totalImages = await prisma.image.count({ where: { authorId: userId } });
 
     return {
-      data: JSON.parse(JSON.stringify(images)),
+      data: images,
       totalPages: Math.ceil(totalImages / limit),
     };
   } catch (error) {

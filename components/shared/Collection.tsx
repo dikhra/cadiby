@@ -12,7 +12,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { transformationTypes } from "@/constants";
-import { IImage } from "@/lib/database/models/image.model";
 import { formUrlQuery } from "@/lib/utils";
 
 import { Button } from "../ui/button";
@@ -56,7 +55,7 @@ export const Collection = ({
       {images.length > 0 ? (
         <ul className="collection-list">
           {images.map((image) => (
-            <Card image={image} key={image._id} />
+            <Card image={image} key={image.id} />
           ))}
         </ul>
       ) : (
@@ -97,13 +96,13 @@ export const Collection = ({
 const Card = ({ image }: { image: IImage }) => {
   return (
     <li>
-      <Link href={`/transformations/${image._id}`} className="collection-card">
+      <Link href={`/transformations/${image.id}`} className="collection-card">
         <CldImage
           src={image.publicId}
           alt={image.title}
-          width={image.width}
-          height={image.height}
-          {...image.config}
+          width={image.width ?? undefined}
+          height={image.height ?? undefined}
+          {...(image.config as object)}
           loading="lazy"
           className="h-52 w-full rounded-[10px] object-cover"
           sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"

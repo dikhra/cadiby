@@ -78,7 +78,7 @@ const ImageDetails = async ({ params: { id } }: SearchParamProps) => {
             type={image.transformationType}
             title={image.title}
             isTransforming={false}
-            transformationConfig={image.config}
+            transformationConfig={image.config as Transformations | null}
             hasDownload={true}
           />
         </div>
@@ -86,12 +86,12 @@ const ImageDetails = async ({ params: { id } }: SearchParamProps) => {
         {userId === image.author.clerkId && (
           <div className="mt-4 space-y-4">
             <Button asChild type="button" className="submit-button capitalize">
-              <Link href={`/transformations/${image._id}/update`}>
+              <Link href={`/transformations/${image.id}/update`}>
                 Update Image
               </Link>
             </Button>
 
-            <DeleteConfirmation imageId={image._id} />
+            <DeleteConfirmation imageId={image.id} />
           </div>
         )}
       </section>

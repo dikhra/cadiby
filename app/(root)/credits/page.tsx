@@ -65,7 +65,7 @@ const Credits = async () => {
                     planId={plan._id}
                     amount={plan.price}
                     credits={plan.credits}
-                    buyerId={user._id}
+                    buyerId={user.id}
                   />
                 </SignedIn>
               )}

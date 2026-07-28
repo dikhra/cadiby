@@ -1,6 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import Transaction from "@/lib/database/models/transaction.model";
-import { connectToDatabase } from "@/lib/database/mongoose";
 import { handleError } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { createTransaction } from "@/lib/actions/transaction.action";

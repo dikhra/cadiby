@@ -11,7 +11,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // ERROR HANDLER
-export const handleError = (error: unknown) => {
+export function handleError(error: unknown): never {
   if (error instanceof Error) {
     // This is a native JavaScript error (e.g., TypeError, RangeError)
     console.error(error.message);
@@ -25,7 +25,7 @@ export const handleError = (error: unknown) => {
     console.error(error);
     throw new Error(`Unknown error: ${JSON.stringify(error)}`);
   }
-};
+}
 
 // PLACEHOLDER LOADER - while image is transforming
 const shimmer = (w: number, h: number) => `
