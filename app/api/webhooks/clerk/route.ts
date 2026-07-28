@@ -64,7 +64,9 @@ export async function POST(req: Request) {
     const user = {
       clerkId: id,
       email: email_addresses[0].email_address,
-      username: username!,
+      // OAuth sign-ups (Google, etc.) don't have a Clerk username; fall back to one
+      // derived from the clerk id so the unique, non-null DB column is always satisfied.
+      username: username ?? `user_${id.slice(-12)}`,
       firstName: first_name,
       lastName: last_name,
       photo: image_url,
@@ -91,7 +93,7 @@ export async function POST(req: Request) {
     const user = {
       firstName: first_name,
       lastName: last_name,
-      username: username!,
+      username: username ?? `user_${id.slice(-12)}`,
       photo: image_url,
     };
 
