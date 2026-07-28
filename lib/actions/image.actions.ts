@@ -117,11 +117,15 @@ export async function getAllImages({
       expression += ` AND ${searchQuery}`;
     }
 
-    const { resources } = await cloudinary.search.expression(expression).execute();
+    const { resources } = await cloudinary.search
+      .expression(expression)
+      .execute();
 
     const resourceIds = resources.map((resource: any) => resource.public_id);
 
-    const where = searchQuery ? { publicId: { in: resourceIds as string[] } } : {};
+    const where = searchQuery
+      ? { publicId: { in: resourceIds as string[] } }
+      : {};
 
     const skipAmount = (Number(page) - 1) * limit;
 
@@ -167,7 +171,9 @@ export async function getUserImages({
       take: limit,
     });
 
-    const totalImages = await prisma.image.count({ where: { authorId: userId } });
+    const totalImages = await prisma.image.count({
+      where: { authorId: userId },
+    });
 
     return {
       data: images,

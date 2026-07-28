@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function TransformationsPage() {
-  return (
-    <div>TransformationsPage</div>
-  )
+  return <div>TransformationsPage</div>;
 }
 
-export default TransformationsPage
+export default TransformationsPage;

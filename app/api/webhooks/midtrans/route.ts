@@ -21,7 +21,6 @@ export async function POST(request: Request) {
       const updatedTransaction = await updateTransactionStatus(
         orderId,
         transaction.status
-
       );
 
       return NextResponse.json({

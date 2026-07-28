@@ -1,18 +1,21 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { handleError } from '@/lib/utils';
-import { useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { handleError } from "@/lib/utils";
+import { useEffect } from "react";
 
 const Checkout = ({ name, planId, amount, credits, buyerId }: any) => {
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY as string);
+    const script = document.createElement("script");
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute(
+      "data-client-key",
+      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY as string
+    );
     script.async = true;
 
     script.onload = () => {
-      console.log('Snap.js loaded.');
+      console.log("Snap.js loaded.");
     };
 
     document.body.appendChild(script);
@@ -34,8 +37,8 @@ const Checkout = ({ name, planId, amount, credits, buyerId }: any) => {
         buyerId: buyerId,
       };
 
-      const response = await fetch('api/midtrans', {
-        method: 'POST',
+      const response = await fetch("api/midtrans", {
+        method: "POST",
         body: JSON.stringify(data),
       });
 
@@ -44,7 +47,7 @@ const Checkout = ({ name, planId, amount, credits, buyerId }: any) => {
       if ((window as any).snap && (window as any).snap.pay) {
         (window as any).snap.pay(requestData.token);
       } else {
-        throw new Error('Snap is not initialized properly');
+        throw new Error("Snap is not initialized properly");
       }
     } catch (error) {
       handleError(error); // Handle error appropriately
